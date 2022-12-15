@@ -4,5 +4,5 @@ This code sets up a bot for the Discord chat platform using the discord.py libra
 
 You will need to install the following packages using the CLI:
 
-pip install discord.py
+pip install discord.py, 
 pip install openai
