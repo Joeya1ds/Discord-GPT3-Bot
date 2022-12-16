@@ -1,35 +1,62 @@
 import discord
-from discord.ext import commands
+from discord import app_commands
 import openai
+import os
+openai.api_key = "OPEN-API-KEY-HERE"
+BotToken = 'BOT-TOKEN-HERE'
+path = 'USERLOG-FILEPATH-HERE'
 
-intents = discord.Intents.all()
-intents.members = True
-bot = commands.Bot(command_prefix="/", intents=intents)
-openai.api_key = "OPENAI-API-KEY-HERE"
 
-@bot.event
-async def on_ready():
-    print('Logged in as')
-    print(bot.user.name)
-    print(bot.user.id)
-    print('------')
+class aclient(discord.Client):
+    def __init__(self):
+        super().__init__(intents=discord.Intents.all())
+        self.synced = False
 
-@bot.command()
-async def ask(ctx, *, prompt):
-    response = openai.Completion.create(
-        engine="text-davinci-003",
-        prompt=prompt,
-        max_tokens=200,
-        temperature=0.8,
-        top_p=0.8,
-    )
+    async def on_ready(self):
+        await self.wait_until_ready()
+        await self.change_presence(activity=discord.Activity(type=discord.ActivityType.listening, name='your prompts!'))
+        if not self.synced:
+            await tree.sync()
+            self.synced = True
+        print('Logged in as:')
+        print(str(self.user.name) + ", " + str(self.user.id))
+        print("Created by Joeyy#4628. The most up-to-date code can be found on github: https://github.com/Joeya1ds/Discord-GPT3-Bot")
+        print('--------------------------------------------------------------------------------------------------------------------')
+
+
+client = aclient()
+tree = app_commands.CommandTree(client)
+
+
+@tree.command(name="ask", description="Ask the AI bot a question!")
+async def ask(interaction: discord.Interaction, prompt: str):
+    username = interaction.user.name
+    user = interaction.user.id
+
+    # Moderation API flagging and response creation
     moderate = openai.Moderation.create(
         input=prompt,
     )
-    naughtyask = moderate['results'][0]['flagged']
-    if str(naughtyask) == "False":
-        await ctx.send(response['choices'][0]['text'])
+    moderateresult = moderate['results'][0]['flagged']
+    if str(moderateresult) == "False":
+        openairesponse = openai.Completion.create(
+            engine="text-davinci-003",
+            prompt=prompt,
+            max_tokens=100,
+            temperature=0.8,
+            top_p=0.8,
+        )
+        await interaction.response.send_message(openairesponse['choices'][0]['text'])
     else:
-        await ctx.send("I cannot respond to what you have said, it has been flagged by the moderation API.")
+        await interaction.response.send_message("I cannot respond to what you have said, it has been flagged by the Moderation API.")
+        print("User " + str(username) + " with ID: " + str(user) + " has had a prompt flagged by the Moderation API. Consider checking UserLogs.")
 
-bot.run('BOT-TOKEN-HERE')
+    # Logging User Messages inside text file
+    if not os.path.exists(path + "/" + str(user)):
+        print("User " + str(username) + " with ID: " + str(user) + " does not have a log file created. Creating.")
+        os.makedirs(path + "/" + str(user))
+    with open(path + "/" + str(user) + "/" + str(user) + ".txt", "a") as f:
+        f.write("User " + str(username) + ' wrote: "' + prompt + '" using '  + str(openairesponse['usage']['total_tokens']) + " tokens." + "\n")
+
+
+client.run(BotToken)
