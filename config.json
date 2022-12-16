@@ -1,0 +1,5 @@
+{
+    "OPENAI_API_KEY": "OPEN-API-KEY-HERE",
+    "DISCORD_BOT_TOKEN": "BOT-TOKEN-HERE",
+    "LOG_PATH": "/path/to/log/folder"
+}

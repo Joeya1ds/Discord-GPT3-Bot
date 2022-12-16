@@ -1,11 +1,14 @@
+import os
+import openai
+import json
 import discord
 from discord import app_commands
-import openai
-import os
-openai.api_key = "OPEN-API-KEY-HERE"
-BotToken = 'BOT-TOKEN-HERE'
-path = 'USERLOG-FILEPATH-HERE'
 
+with open('./config.json') as data:
+    config = json.load(data)
+
+path = config['LOG_PATH']
+openai.api_key = config['OPENAI_API_KEY']
 
 class aclient(discord.Client):
     def __init__(self):
@@ -59,4 +62,4 @@ async def ask(interaction: discord.Interaction, prompt: str):
         f.write("User " + str(username) + ' wrote: "' + prompt + '" using '  + str(openairesponse['usage']['total_tokens']) + " tokens." + "\n")
 
 
-client.run(BotToken)
+client.run(config['DISCORD_BOT_TOKEN'])
