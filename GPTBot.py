@@ -1,4 +1,5 @@
 import json
+import asyncio
 import openai
 import discord
 from discord import app_commands
@@ -10,6 +11,7 @@ with open('./config.json') as data:
 
 path = config['LOG_PATH']
 openai.api_key = config['OPENAI_API_KEY']
+
 
 class aclient(discord.Client):
 
@@ -39,10 +41,12 @@ class aclient(discord.Client):
 client = aclient()
 tree = app_commands.CommandTree(client)
 
+
 @tree.command(name='ask', description='Ask the AI bot a question!')
 async def ask(interaction: discord.Interaction, prompt: str):
 
     user_id = interaction.user.id
+    await interaction.response.defer()
 
     # Moderation API flagging
     moderate = openai.Moderation.create(input=prompt)
@@ -56,8 +60,9 @@ async def ask(interaction: discord.Interaction, prompt: str):
         logger.append_log(path, user_id, prompt)
         logger.append_warning_log(path, user_id)
         logger.append_newline_log(path, user_id)
-        
-        await interaction.response.send_message('I cannot respond to what you have said, it has been flagged by the Moderation API.')
+
+        await asyncio.sleep(3)
+        await interaction.followup.send('I cannot respond to what you have said, it has been flagged by the Moderation API.')
         print(f'User with ID: {user_id} has had a prompt flagged by the Moderation API. Consider checking logs.')
         
         return
@@ -76,7 +81,8 @@ async def ask(interaction: discord.Interaction, prompt: str):
     logger.append_token_log(path, user_id, openairesponse["usage"]["total_tokens"])
     logger.append_newline_log(path, user_id)
 
-    await interaction.response.send_message(openairesponse['choices'][0]['text'])
+    await asyncio.sleep(3)
+    await interaction.followup.send(openairesponse['choices'][0]['text'])
 
 
 client.run(config['DISCORD_BOT_TOKEN'])
