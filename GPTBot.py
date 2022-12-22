@@ -32,7 +32,7 @@ class aclient(discord.Client):
             await tree.sync()
             self.synced = True
 
-        print('Logged in as:')
+        print('\u001b[43;1m[INFO]\u001b[0m Logged in as:')
         print(f'{self.user.name}, {self.user.id}')
         print('Created by Joeyy#4628. The most up-to-date code can be found on github: https://github.com/Joeya1ds/Discord-GPT3-Bot')
         print('--------------------------------------------------------------------------------------------------------------------')
@@ -63,7 +63,7 @@ async def ask(interaction: discord.Interaction, prompt: str):
 
         await asyncio.sleep(3)
         await interaction.followup.send('I cannot respond to what you have said, it has been flagged by the Moderation API.')
-        print(f'User with ID: {user_id} has had a prompt flagged by the Moderation API. Consider checking logs.')
+        print(f'\u001b[41;1m[WARN]\u001b[0m User with ID: {user_id} has had a prompt flagged by the Moderation API. Consider checking logs.')
         
         return
 
