@@ -31,7 +31,8 @@ Before running the bot, you will need to configure **[config.json]('./config.jso
 To run the bot, use the following command:
 
 ```sh
-python bot.py
+cd /path/to/Discord-GPT3-Bot
+python GPTBot.py
 ```
 
 This will start the bot and allow it to listen for commands and generate responses.
